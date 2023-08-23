@@ -1,0 +1,169 @@
+class Employee:
+    employee_count = {"Programmer": 0, "HR": 0}
+    def __init__(self, name, joining_date, work_experience = 0, weekly_work_hour = 40):
+        self.name = name
+        if work_experience == 0:
+            self.joining_date = joining_date
+        else:
+            year, month, day = joining_date.split("-")
+            self.joining_date = f"{year}-{month}-{day}"
+        self.work_experience = work_experience
+        if weekly_work_hour > 60 or weekly_work_hour < 40:
+            print(f"{self.name} cannot work for {weekly_work_hour} hours.")
+            self.weekly_work_hour = 40
+        else:
+            self.weekly_work_hour = weekly_work_hour
+
+    @classmethod
+    def showDetails(cls):
+        total_employee = sum(Employee.employee_count.values())
+        total_programmers = Employee.employee_count["Programmer"]
+        total_hr_employees = Employee.employee_count["HR"]
+        if total_employee == 0:
+            print(f"Currently the company doesn't have any employees.\nTotal Employee/s: {total_employee}")
+        else :
+            if total_programmers != 0 and total_hr_employees == 0 :
+                print(f"Company workforce:\nTotal Employee/s: {total_employee}\nTotal Programmer Employee/s: {total_programmers}")
+            elif total_programmers == 0 and total_hr_employees != 0 :
+                print(f"Company workforce:\nTotal Employee/s: {total_employee}\nTotal HR Employee/s: {total_hr_employees}")
+            elif total_programmers != 0 and total_hr_employees != 0 :
+                print(f"Company workforce:\nTotal Employee/s: {total_employee}\nTotal Programmer Employee/s: {total_programmers}\nTotal HR Employee/s: {total_hr_employees}")
+
+from datetime import datetime
+class Programmer(Employee):
+    designation_list = ["Junior Software Engineer", "Software Engineer", "Senior Software Engineer", "Technical Lead" ]
+    def __init__(self, name, joining_date, work_experience = 0, weekly_work_hour = 40):
+        super().__init__(name, joining_date, work_experience, weekly_work_hour)
+        Employee.employee_count["Programmer"] += 1
+        self.id = self.createProgrammerID()
+        if 0 <= work_experience < 3:
+            self.designation = Programmer.designation_list[0]
+        elif 3 <= work_experience < 5:
+            self.designation = Programmer.designation_list[1]
+        elif 5 <= work_experience < 8:
+            self.designation = Programmer.designation_list[2]
+        else:
+            self.designation = Programmer.designation_list[3]
+
+    def createProgrammerID(self):
+        create_programmer_id = str(self.joining_date).split("-")
+        new_programmer_id = f"P-{create_programmer_id[0][-2:]}{create_programmer_id[1]}{create_programmer_id[2]}-{str(sum(Employee.employee_count.values()))}"
+        return new_programmer_id
+
+    def calculateSalary(self):
+        base_salaries = {"Junior Software Engineer": 30000, "Software Engineer": 45000, "Senior Software Engineer": 70000, "Technical Lead": 120000}
+        if self.designation in Programmer.designation_list :
+            self.salary = base_salaries[self.designation]
+            joined_date = self.joining_date
+            years_employed = 0
+            if self.work_experience != 0 :
+                current_date = datetime.now()
+                joined_date = datetime.strptime(self.joining_date, '%Y-%m-%d')
+                years_employed = ((current_date.year) - (joined_date.year))
+            for i in range(int(years_employed)):
+                self.salary += self.salary * 0.15
+            return self.salary
+        else :
+            print(f"Salary cannot be determined\nPlease try again")
+
+    def calculateOvertime(self):
+        overtime = self.weekly_work_hour - 40
+        taka_generated_overtime = 4*(overtime*500)
+        self.salary += taka_generated_overtime
+        if overtime != 0:
+            print(f"{self.name} will get BDT {taka_generated_overtime} overtime.")
+        else:
+            print(f"{self.name} will not get overtime.")
+
+    def showProgrammerDetails(self):
+        print(f"Programmer Employee:\nName: {self.name}\nID: {self.id}\nJoining Date: {self.joining_date}\nDesignation: {self.designation}\nSalary: BDT {self.salary}")
+
+class HR(Employee):
+    def __init__(self, name, joining_date, work_experience = 0, weekly_work_hour = 40):
+        super().__init__(name, joining_date, work_experience, weekly_work_hour)
+        Employee.employee_count["HR"] += 1
+        self.id = self.createHREmployeeID()
+
+    def createHREmployeeID(self):
+        create_HR_id = str(self.joining_date).split("-")
+        new_HR_id = f"HR-{create_HR_id[0][-2:]}{create_HR_id[1]}{create_HR_id[2]}-{str(sum(Employee.employee_count.values()))}"
+        return new_HR_id
+
+    def showHREmployeeDetails(self):
+        print(f"HR Employee:\nName: {self.name}\nID: {self.id}\nJoining Date: {self.joining_date}")
+
+class InternProgrammer(Programmer):
+    intern_count = 0
+    def __init__(self, name, joining_date, intern_type = "Unpaid", work_experience = 0, weekly_work_hour = 40):
+        InternProgrammer.intern_count += 1
+        super().__init__(name, joining_date, work_experience, weekly_work_hour)
+        Employee.employee_count["Programmer"]-=1
+        self.temp_id = f"Temp_{str(InternProgrammer.intern_count)}"
+        self.intern_type = intern_type
+        self.status = "Not Eligible for promotion"
+        current_date = datetime.now()
+        joined = datetime.strptime(self.joining_date, '%Y-%m-%d')
+        months_completed = (current_date - joined).days / 30
+        if months_completed >= 4:
+            self.status = "Eligible for promotion"
+
+    def promoteToProgrammer(self):
+        if self.status == "Not Eligible for promotion":
+            print(f"{self.name} can not be promoted.")
+        else:
+            today = datetime.now()
+            format_date = today.strftime('%Y-%m-%d')
+            date = str(format_date).split("-")
+            joining_date = f"{date[0]}-{date[1]}-{date[2]}"
+            new_programmer = Programmer(self.name, joining_date, 0, 40)
+            print(f"{self.name} is now promoted")
+            return new_programmer
+
+    def showInternDetails(self):
+        print(f"Intern (Programmer):\nName: {self.name}\nID: {self.temp_id}\nJoining Date: {self.joining_date}\nType: {self.intern_type}\nStatus: {self.status}")
+
+#Driver code:
+Employee.showDetails()
+print("=========1=========")
+fahim = Programmer("Md. Fahim", "2020-03-21", 4, 65)
+fahim.calculateSalary()
+print("=========2=========")
+fahim.showProgrammerDetails()
+print("=========3=========")
+fahim.calculateOvertime()
+print("=========4=========")
+fahim.showProgrammerDetails()
+print("=========5=========")
+jiyad = HR("Jiyad Hasan", "2021-01-10", 2, 40)
+print("=========6=========")
+jiyad.showHREmployeeDetails()
+print("=========7=========")
+Employee.showDetails()
+print("=========8=========")
+shoeb = Programmer("Shoeb Ahmed", "2020-03-02", 6, 35)
+shoeb.calculateSalary()
+print("=========9=========")
+shoeb.calculateOvertime()
+print("=========10=========")
+shoeb.showProgrammerDetails()
+print("=========11=========")
+tarik = Programmer("Tarik Ahmed", "2017-11-12", 9)
+tarik.calculateSalary()
+tarik.calculateOvertime()
+tarik.showProgrammerDetails()
+print("=========12=========")
+mehedi = InternProgrammer("Mehedi Hasan", "2023-02-02")
+mehedi.showInternDetails()
+print("=========13=========")
+haq = InternProgrammer("Shamsul Haq", "2023-06-05", "Paid")
+haq.showInternDetails()
+print("=========14=========")
+haq = haq.promoteToProgrammer()
+print("=========15=========")
+Employee.showDetails()
+print("=========16=========")
+mehedi = mehedi.promoteToProgrammer()
+mehedi.calculateSalary()
+mehedi.showProgrammerDetails()
+print("=========17=========")
+Employee.showDetails()
