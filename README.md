@@ -1,5 +1,9 @@
 # Personal University Assignments Repository
 
+<img src="https://wakapi-qt1b.onrender.com/api/badge/fahad/interval:any/project:CSE111" 
+     alt="Wakapi Time Tracking" 
+     title="Spent more than that amount of time spent on this project">
+
 Welcome to the Personal University Assignments Repository! This repository serves as a central location for me to store, track, and manage all of my university assignments and projects. 
 
 ## About
